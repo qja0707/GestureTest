@@ -5,98 +5,103 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useRef } from 'react';
 import {
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
   useColorScheme,
   View,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
+import { useSharedValue } from 'react-native-reanimated';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
+import MoveableTodoBox from './src/MoveableTodoBox';
+import TodoBox from './src/TodoBox';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const hourArr = Array.from({ length: 24 }, (_, i) => i);
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+const dummyTodoList = [
+  { id: '1', text: '고양이 밥 주기' },
+  { id: '2', text: '정원에 물 주기' },
+  { id: '3', text: '책 한 권 읽기' },
+  { id: '4', text: '커피 한 잔 즐기기' },
+  { id: '5', text: '회의 준비하기' },
+  { id: '6', text: '이메일 확인하기' },
+  { id: '7', text: '집 청소하기' },
+  { id: '8', text: '산책하기' },
+  { id: '9', text: '식료품 쇼핑하기' },
+  { id: '10', text: '저녁 요리하기' },
+];
 
 function App(): React.JSX.Element {
+  const todoScrollViewRef = useRef<ScrollView>(null);
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const offset = useSharedValue({ x: 0, y: 0 });
+
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+    <GestureHandlerRootView>
+      <SafeAreaView style={[backgroundStyle, styles.container]}>
+        <StatusBar
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={backgroundStyle.backgroundColor}
+        />
+        <View style={styles.calendarContainer}>
+          <ScrollView>
+            {hourArr.map(hour => (
+              <View style={styles.timeBox} key={hour} />
+            ))}
+          </ScrollView>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+
+        <View style={styles.todoContainer}>
+          <ScrollView
+            contentContainerStyle={styles.bottomScroll}
+            ref={todoScrollViewRef}>
+            {dummyTodoList.map(item => (
+              <TodoBox key={item.id} text={item.text} offset={offset} />
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* <Ball /> */}
+
+        <MoveableTodoBox offset={offset} />
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  calendarContainer: {
+    flex: 2,
+  },
+  todoContainer: {
+    flex: 1,
+    borderTopWidth: 3,
+  },
+  timeBox: {
+    width: '100%',
+    height: 100,
+    borderWidth: 1,
+    borderColor: '#C5C5C5',
+  },
+
+  bottomScroll: {
+    padding: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 5,
+  },
   sectionContainer: {
     marginTop: 32,
     paddingHorizontal: 24,
