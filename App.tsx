@@ -5,35 +5,26 @@
  * @format
  */
 
-import React, { useRef } from 'react';
+import React, {useRef, useState} from 'react';
 import {
+  FlatList,
   SafeAreaView,
   StatusBar,
   StyleSheet,
   useColorScheme,
   View,
+  ViewToken,
 } from 'react-native';
 
-import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
-import { useSharedValue } from 'react-native-reanimated';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import {GestureHandlerRootView, ScrollView} from 'react-native-gesture-handler';
+import {useSharedValue} from 'react-native-reanimated';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import HourBox from './src/HourBox';
 import MoveableTodoBox from './src/MoveableTodoBox';
+import useDummyTodoStore from './src/store/useDummyTodoStore';
 import TodoBox from './src/TodoBox';
 
-const hourArr = Array.from({ length: 24 }, (_, i) => i);
-
-const dummyTodoList = [
-  { id: '1', text: '고양이 밥 주기' },
-  { id: '2', text: '정원에 물 주기' },
-  { id: '3', text: '책 한 권 읽기' },
-  { id: '4', text: '커피 한 잔 즐기기' },
-  { id: '5', text: '회의 준비하기' },
-  { id: '6', text: '이메일 확인하기' },
-  { id: '7', text: '집 청소하기' },
-  { id: '8', text: '산책하기' },
-  { id: '9', text: '식료품 쇼핑하기' },
-  { id: '10', text: '저녁 요리하기' },
-];
+const hourArr = Array.from({length: 24}, (_, i) => i);
 
 function App(): React.JSX.Element {
   const todoScrollViewRef = useRef<ScrollView>(null);
@@ -43,7 +34,33 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const offset = useSharedValue({ x: 0, y: 0 });
+  const offset = useSharedValue({x: 0, y: 0});
+
+  const [isScrolling, setIsScrolling] = useState(false);
+
+  const [visibleItems, setVisibleItems] = useState<number[]>([]);
+
+  const dummyTodoList = useDummyTodoStore(state => state.todo);
+
+  const handleViewableItemsChanged = ({
+    viewableItems,
+    changed,
+  }: {
+    viewableItems: ViewToken<number>[];
+    changed: ViewToken<number>[];
+  }) => {
+    const ids = viewableItems.map(vt => vt.item);
+
+    setVisibleItems(ids);
+  };
+
+  const handleMomentumScrollEnd = () => {
+    setIsScrolling(false);
+  };
+
+  const handleMomentumScrollBegin = () => {
+    setIsScrolling(true);
+  };
 
   return (
     <GestureHandlerRootView>
@@ -53,11 +70,20 @@ function App(): React.JSX.Element {
           backgroundColor={backgroundStyle.backgroundColor}
         />
         <View style={styles.calendarContainer}>
-          <ScrollView>
-            {hourArr.map(hour => (
-              <View style={styles.timeBox} key={hour} />
-            ))}
-          </ScrollView>
+          <FlatList
+            data={hourArr}
+            renderItem={({item}) => (
+              <HourBox
+                hour={item}
+                isScrolling={isScrolling}
+                isVisible={visibleItems.includes(item)}
+              />
+            )}
+            keyExtractor={item => item + ''}
+            onViewableItemsChanged={handleViewableItemsChanged}
+            onMomentumScrollEnd={handleMomentumScrollEnd}
+            onMomentumScrollBegin={handleMomentumScrollBegin}
+          />
         </View>
 
         <View style={styles.todoContainer}>
@@ -69,8 +95,6 @@ function App(): React.JSX.Element {
             ))}
           </ScrollView>
         </View>
-
-        {/* <Ball /> */}
 
         <MoveableTodoBox offset={offset} />
       </SafeAreaView>

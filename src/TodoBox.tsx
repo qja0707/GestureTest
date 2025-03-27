@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, {useRef} from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,10 +6,19 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { runOnJS, SharedValue } from 'react-native-reanimated';
+import {
+  Gesture,
+  GestureDetector,
+  GestureUpdateEvent,
+  PanGestureHandlerEventPayload,
+} from 'react-native-gesture-handler';
+import {runOnJS, SharedValue} from 'react-native-reanimated';
 import useMoveableTodoStore from './store/useMoveableTodoStore';
+import eventBus from './eventBus';
 
+const handleEmit = (e: GestureUpdateEvent<PanGestureHandlerEventPayload>) => {
+  eventBus.emit('todoMoving', {x: e.absoluteX, y: e.absoluteY});
+};
 interface Props {
   text: string;
   offset: SharedValue<{
@@ -18,17 +27,15 @@ interface Props {
   }>;
 }
 const TodoBox = (props: Props) => {
-  const { text, offset } = props;
+  const {text, offset} = props;
 
   const panEnabled = useRef(false);
 
   const ref = useRef<View>(null);
 
-  const { todo, setMoveableTodo } = useMoveableTodoStore(state => state);
+  const {todo, setMoveableTodo} = useMoveableTodoStore(state => state);
 
-  const handleLayout = () => { };
-
-  const { height, width } = useWindowDimensions();
+  const {height, width} = useWindowDimensions();
 
   const handleLongPress = () => {
     if (!ref?.current) {
@@ -40,9 +47,9 @@ const TodoBox = (props: Props) => {
     ref.current.measureInWindow((x: number, y: number) => {
       console.log('x:', x, 'y:', y);
       console.log('width:', width, 'height:', height);
-      setMoveableTodo({ text, style: styles.container, location: { x, y } });
+      setMoveableTodo({text, style: styles.container, location: {x, y}});
 
-      offset.value = { x: 0, y: 0 };
+      offset.value = {x: 0, y: 0};
     });
 
     Vibration.vibrate(10);
@@ -51,7 +58,7 @@ const TodoBox = (props: Props) => {
   const handleFinalize = () => {
     panEnabled.current = false;
 
-    setMoveableTodo(null);
+    eventBus.emit('todoFinalize');
   };
 
   const combinedGesture = Gesture.Simultaneous(
@@ -64,7 +71,9 @@ const TodoBox = (props: Props) => {
           return;
         }
 
-        offset.value = { x: e.translationX, y: e.translationY };
+        offset.value = {x: e.translationX, y: e.translationY};
+
+        runOnJS(handleEmit)(e);
       })
       .onFinalize(() => {
         runOnJS(handleFinalize)();
@@ -74,7 +83,7 @@ const TodoBox = (props: Props) => {
 
   return (
     <GestureDetector gesture={combinedGesture}>
-      <View ref={ref} style={styles.container} onLayout={handleLayout}>
+      <View ref={ref} style={styles.container}>
         <Text>{text}</Text>
       </View>
     </GestureDetector>
