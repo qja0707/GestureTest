@@ -75,6 +75,7 @@ function App(): React.JSX.Element {
                 hour={item}
                 isScrolling={isScrolling}
                 isVisible={visibleItems.includes(item)}
+                offset={offset}
               />
             )}
             keyExtractor={item => item + ''}

@@ -1,20 +1,22 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {LayoutChangeEvent, StyleSheet, Text, View} from 'react-native';
-import {useSharedValue} from 'react-native-reanimated';
+import {SharedValue} from 'react-native-reanimated';
+import {EVENT_NAMES} from './constants/eventNames';
 import eventBus from './eventBus';
+import useDummyTodoStore from './store/useDummyTodoStore';
 import useMoveableTodoStore from './store/useMoveableTodoStore';
 import TodoBox from './TodoBox';
-import useDummyTodoStore from './store/useDummyTodoStore';
-import {EVENT_NAMES} from './constants/eventNames';
+import {LocationCoord} from './types';
 
 interface Props {
   hour: number;
   isScrolling: boolean;
   isVisible: boolean;
+  offset: SharedValue<LocationCoord>;
 }
 
 const HourBox = (props: Props) => {
-  const {hour, isScrolling, isVisible} = props;
+  const {hour, isScrolling, isVisible, offset} = props;
 
   const [isHovered, setIsHovered] = useState(false);
 
@@ -30,11 +32,9 @@ const HourBox = (props: Props) => {
   const dummyTodoList = useDummyTodoStore(state => state.todo);
   const setDummyTodo = useDummyTodoStore(state => state.setMoveableTodo);
 
-  const offset = useSharedValue({x: 0, y: 0});
-
   useEffect(() => {
     // 이벤트 구독
-    const handlePan = (data: {x: number; y: number}) => {
+    const handlePan = (data: LocationCoord) => {
       if (!isVisible) {
         return;
       }
