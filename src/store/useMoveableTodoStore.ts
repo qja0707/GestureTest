@@ -1,10 +1,10 @@
-import { StyleProp, ViewStyle } from 'react-native';
-import { create } from 'zustand';
+import {StyleProp, ViewStyle} from 'react-native';
+import {create} from 'zustand';
 
 interface Todo {
   text: string;
   style: StyleProp<ViewStyle>;
-  location: { x: number; y: number };
+  location: {x: number; y: number};
 }
 
 interface UseMoveableTodoStore {
@@ -14,7 +14,7 @@ interface UseMoveableTodoStore {
 
 const useMoveableTodoStore = create<UseMoveableTodoStore>(set => ({
   todo: null,
-  setMoveableTodo: todo => set({ todo }),
+  setMoveableTodo: todo => set({todo}),
 }));
 
 export default useMoveableTodoStore;

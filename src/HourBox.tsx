@@ -5,6 +5,7 @@ import eventBus from './eventBus';
 import useMoveableTodoStore from './store/useMoveableTodoStore';
 import TodoBox from './TodoBox';
 import useDummyTodoStore from './store/useDummyTodoStore';
+import {EVENT_NAMES} from './constants/eventNames';
 
 interface Props {
   hour: number;
@@ -51,10 +52,10 @@ const HourBox = (props: Props) => {
       setIsHovered(true);
     };
 
-    eventBus.on('todoMoving', handlePan);
+    eventBus.on(EVENT_NAMES.TODO_MOVING, handlePan);
 
     return () => {
-      eventBus.off('todoMoving', handlePan);
+      eventBus.off(EVENT_NAMES.TODO_MOVING, handlePan);
     };
   }, [isHovered, isVisible]);
 
@@ -77,10 +78,10 @@ const HourBox = (props: Props) => {
       setTodoList([...todoList, todo.text]);
     };
 
-    eventBus.on('todoFinalize', handleFinalize);
+    eventBus.on(EVENT_NAMES.TODO_FINALIZE, handleFinalize);
 
     return () => {
-      eventBus.off('todoFinalize', handleFinalize);
+      eventBus.off(EVENT_NAMES.TODO_FINALIZE, handleFinalize);
     };
   }, [todo, isHovered, todoList, setMoveableTodo, setDummyTodo, dummyTodoList]);
 
@@ -104,10 +105,12 @@ const HourBox = (props: Props) => {
       ref={ref}
       style={[styles.timeBox, isHovered && styles.hoveredBackground]}
       onLayout={handleLayout}>
-      <Text>{`${hour}:00`}</Text>
-      {todoList.map(todoItem => (
-        <TodoBox key={todoItem} text={todoItem} offset={offset} />
-      ))}
+      <Text style={styles.timeText}>{`${hour}:00`}</Text>
+      <View style={styles.listContainer}>
+        {todoList.map(todoItem => (
+          <TodoBox key={todoItem} text={todoItem} offset={offset} />
+        ))}
+      </View>
     </View>
   );
 };
@@ -116,10 +119,20 @@ const styles = StyleSheet.create({
   timeBox: {
     paddingHorizontal: 20,
     width: '100%',
-    height: 100,
+    minHeight: 100,
     borderWidth: 1,
     borderColor: '#C5C5C5',
     flexDirection: 'row',
+    padding: 8,
+  },
+  timeText: {
+    marginRight: 10,
+  },
+  listContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    gap: 8,
   },
   hoveredBackground: {
     backgroundColor: '#C5C5C5',

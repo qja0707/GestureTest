@@ -15,10 +15,12 @@ import {
 import {runOnJS, SharedValue} from 'react-native-reanimated';
 import useMoveableTodoStore from './store/useMoveableTodoStore';
 import eventBus from './eventBus';
+import {EVENT_NAMES} from './constants/eventNames';
 
 const handleEmit = (e: GestureUpdateEvent<PanGestureHandlerEventPayload>) => {
-  eventBus.emit('todoMoving', {x: e.absoluteX, y: e.absoluteY});
+  eventBus.emit(EVENT_NAMES.TODO_MOVING, {x: e.absoluteX, y: e.absoluteY});
 };
+
 interface Props {
   text: string;
   offset: SharedValue<{
@@ -26,6 +28,7 @@ interface Props {
     y: number;
   }>;
 }
+
 const TodoBox = (props: Props) => {
   const {text, offset} = props;
 
@@ -58,7 +61,7 @@ const TodoBox = (props: Props) => {
   const handleFinalize = () => {
     panEnabled.current = false;
 
-    eventBus.emit('todoFinalize');
+    eventBus.emit(EVENT_NAMES.TODO_FINALIZE);
   };
 
   const combinedGesture = Gesture.Simultaneous(

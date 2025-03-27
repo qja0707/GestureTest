@@ -9,6 +9,7 @@ import React, {useRef, useState} from 'react';
 import {
   FlatList,
   SafeAreaView,
+  ScrollView,
   StatusBar,
   StyleSheet,
   useColorScheme,
@@ -16,13 +17,12 @@ import {
   ViewToken,
 } from 'react-native';
 
-import {GestureHandlerRootView, ScrollView} from 'react-native-gesture-handler';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {useSharedValue} from 'react-native-reanimated';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import HourBox from './src/HourBox';
 import MoveableTodoBox from './src/MoveableTodoBox';
-import useDummyTodoStore from './src/store/useDummyTodoStore';
-import TodoBox from './src/TodoBox';
+import TodoList from './src/TodoList';
 
 const hourArr = Array.from({length: 24}, (_, i) => i);
 
@@ -39,8 +39,6 @@ function App(): React.JSX.Element {
   const [isScrolling, setIsScrolling] = useState(false);
 
   const [visibleItems, setVisibleItems] = useState<number[]>([]);
-
-  const dummyTodoList = useDummyTodoStore(state => state.todo);
 
   const handleViewableItemsChanged = ({
     viewableItems,
@@ -86,15 +84,7 @@ function App(): React.JSX.Element {
           />
         </View>
 
-        <View style={styles.todoContainer}>
-          <ScrollView
-            contentContainerStyle={styles.bottomScroll}
-            ref={todoScrollViewRef}>
-            {dummyTodoList.map(item => (
-              <TodoBox key={item.id} text={item.text} offset={offset} />
-            ))}
-          </ScrollView>
-        </View>
+        <TodoList todoScrollViewRef={todoScrollViewRef} offset={offset} />
 
         <MoveableTodoBox offset={offset} />
       </SafeAreaView>
@@ -108,23 +98,6 @@ const styles = StyleSheet.create({
   },
   calendarContainer: {
     flex: 2,
-  },
-  todoContainer: {
-    flex: 1,
-    borderTopWidth: 3,
-  },
-  timeBox: {
-    width: '100%',
-    height: 100,
-    borderWidth: 1,
-    borderColor: '#C5C5C5',
-  },
-
-  bottomScroll: {
-    padding: 20,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 5,
   },
   sectionContainer: {
     marginTop: 32,
