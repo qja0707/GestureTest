@@ -85,8 +85,6 @@ const HourBox = (props: Props) => {
         );
 
         setTodoList([...todoList, moveableTodo]);
-
-        console.log('todoList', todoList);
       }
 
       setMoveableTodo(null);
