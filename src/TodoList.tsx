@@ -21,7 +21,7 @@ const TodoList = ({todoScrollViewRef, offset}: Props) => {
         contentContainerStyle={styles.bottomScroll}
         ref={todoScrollViewRef}>
         {dummyTodoList.map(item => (
-          <TodoBox key={item.id} text={item.text} offset={offset} />
+          <TodoBox key={item.id} todo={item} offset={offset} />
         ))}
       </ScrollView>
     </View>

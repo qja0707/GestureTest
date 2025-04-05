@@ -16,13 +16,14 @@ import {runOnJS, SharedValue} from 'react-native-reanimated';
 import useMoveableTodoStore from './store/useMoveableTodoStore';
 import eventBus from './eventBus';
 import {EVENT_NAMES} from './constants/eventNames';
+import {Todo} from './store/useDummyTodoStore';
 
 const handleEmit = (e: GestureUpdateEvent<PanGestureHandlerEventPayload>) => {
   eventBus.emit(EVENT_NAMES.TODO_MOVING, {x: e.absoluteX, y: e.absoluteY});
 };
 
 interface Props {
-  text: string;
+  todo: Todo;
   offset: SharedValue<{
     x: number;
     y: number;
@@ -30,13 +31,15 @@ interface Props {
 }
 
 const TodoBox = (props: Props) => {
-  const {text, offset} = props;
+  const {todo, offset} = props;
 
   const panEnabled = useRef(false);
 
   const ref = useRef<View>(null);
 
-  const {todo, setMoveableTodo} = useMoveableTodoStore(state => state);
+  const {todo: moveableTodo, setMoveableTodo} = useMoveableTodoStore(
+    state => state,
+  );
 
   const {height, width} = useWindowDimensions();
 
@@ -50,7 +53,7 @@ const TodoBox = (props: Props) => {
     ref.current.measureInWindow((x: number, y: number) => {
       console.log('x:', x, 'y:', y);
       console.log('width:', width, 'height:', height);
-      setMoveableTodo({text, style: styles.container, location: {x, y}});
+      setMoveableTodo({...todo, style: styles.container, location: {x, y}});
 
       offset.value = {x: 0, y: 0};
     });
@@ -70,7 +73,7 @@ const TodoBox = (props: Props) => {
         runOnJS(handleLongPress)();
       })
       .onUpdate(e => {
-        if (!todo) {
+        if (!moveableTodo) {
           return;
         }
 
@@ -87,7 +90,7 @@ const TodoBox = (props: Props) => {
   return (
     <GestureDetector gesture={combinedGesture}>
       <View ref={ref} style={styles.container}>
-        <Text>{text}</Text>
+        <Text>{todo.text}</Text>
       </View>
     </GestureDetector>
   );

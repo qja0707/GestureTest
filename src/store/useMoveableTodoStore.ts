@@ -1,15 +1,15 @@
 import {StyleProp, ViewStyle} from 'react-native';
 import {create} from 'zustand';
+import {Todo} from './useDummyTodoStore';
 
-interface Todo {
-  text: string;
+interface MoveableTodo extends Todo {
   style: StyleProp<ViewStyle>;
   location: {x: number; y: number};
 }
 
 interface UseMoveableTodoStore {
-  todo: Todo | null;
-  setMoveableTodo: (todo: Todo | null) => void;
+  todo: MoveableTodo | null;
+  setMoveableTodo: (todo: MoveableTodo | null) => void;
 }
 
 const useMoveableTodoStore = create<UseMoveableTodoStore>(set => ({

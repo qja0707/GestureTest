@@ -1,9 +1,9 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {LayoutChangeEvent, StyleSheet, Text, View} from 'react-native';
 import {SharedValue} from 'react-native-reanimated';
 import {EVENT_NAMES} from './constants/eventNames';
 import eventBus from './eventBus';
-import useDummyTodoStore from './store/useDummyTodoStore';
+import useDummyTodoStore, {Todo} from './store/useDummyTodoStore';
 import useMoveableTodoStore from './store/useMoveableTodoStore';
 import TodoBox from './TodoBox';
 import {LocationCoord} from './types';
@@ -20,13 +20,13 @@ const HourBox = (props: Props) => {
 
   const [isHovered, setIsHovered] = useState(false);
 
-  const [todoList, setTodoList] = useState<string[]>([]);
+  const [todoList, setTodoList] = useState<Todo[]>([]);
 
   const coordY = useRef<[number, number]>([0, 0]);
 
   const ref = useRef<View>(null);
 
-  const todo = useMoveableTodoStore(state => state.todo);
+  const moveableTodo = useMoveableTodoStore(state => state.todo);
   const setMoveableTodo = useMoveableTodoStore(state => state.setMoveableTodo);
 
   const dummyTodoList = useDummyTodoStore(state => state.todo);
@@ -61,21 +61,29 @@ const HourBox = (props: Props) => {
 
   useEffect(() => {
     const handleFinalize = () => {
-      if (!todo) {
+      if (!moveableTodo) {
         return;
       }
 
       if (!isHovered) {
+        if (todoList.find(todo => todo.id === moveableTodo.id)) {
+          setTodoList(todoList.filter(todo => todo.id !== moveableTodo.id));
+        }
+
         return;
       }
 
-      setDummyTodo(dummyTodoList.filter(dummy => dummy.text !== todo.text));
+      if (!todoList.find(todo => todo.id === moveableTodo.id)) {
+        setDummyTodo(
+          dummyTodoList.filter(dummy => dummy.id !== moveableTodo.id),
+        );
+
+        setTodoList([...todoList, moveableTodo]);
+      }
 
       setMoveableTodo(null);
 
       setIsHovered(false);
-
-      setTodoList([...todoList, todo.text]);
     };
 
     eventBus.on(EVENT_NAMES.TODO_FINALIZE, handleFinalize);
@@ -83,7 +91,14 @@ const HourBox = (props: Props) => {
     return () => {
       eventBus.off(EVENT_NAMES.TODO_FINALIZE, handleFinalize);
     };
-  }, [todo, isHovered, todoList, setMoveableTodo, setDummyTodo, dummyTodoList]);
+  }, [
+    moveableTodo,
+    isHovered,
+    todoList,
+    setMoveableTodo,
+    setDummyTodo,
+    dummyTodoList,
+  ]);
 
   useEffect(() => {
     if (isScrolling) {
@@ -108,7 +123,7 @@ const HourBox = (props: Props) => {
       <Text style={styles.timeText}>{`${hour}:00`}</Text>
       <View style={styles.listContainer}>
         {todoList.map(todoItem => (
-          <TodoBox key={todoItem} text={todoItem} offset={offset} />
+          <TodoBox key={todoItem.id} todo={todoItem} offset={offset} />
         ))}
       </View>
     </View>
