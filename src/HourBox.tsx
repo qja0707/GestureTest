@@ -1,5 +1,11 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {LayoutChangeEvent, StyleSheet, Text, View} from 'react-native';
+import {
+  LayoutChangeEvent,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {SharedValue} from 'react-native-reanimated';
 import {EVENT_NAMES} from './constants/eventNames';
 import eventBus from './eventBus';
@@ -79,6 +85,8 @@ const HourBox = (props: Props) => {
         );
 
         setTodoList([...todoList, moveableTodo]);
+
+        console.log('todoList', todoList);
       }
 
       setMoveableTodo(null);
@@ -121,11 +129,13 @@ const HourBox = (props: Props) => {
       style={[styles.timeBox, isHovered && styles.hoveredBackground]}
       onLayout={handleLayout}>
       <Text style={styles.timeText}>{`${hour}:00`}</Text>
-      <View style={styles.listContainer}>
+      <ScrollView
+        contentContainerStyle={styles.listContainer}
+        horizontal={true}>
         {todoList.map(todoItem => (
           <TodoBox key={todoItem.id} todo={todoItem} offset={offset} />
         ))}
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -145,7 +155,6 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'flex-start',
     gap: 8,
   },
