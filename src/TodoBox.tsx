@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -33,6 +33,8 @@ interface Props {
 const TodoBox = (props: Props) => {
   const {todo, offset} = props;
 
+  const [isTransparent, setIsTransparent] = useState(false);
+
   const panEnabled = useRef(false);
 
   const ref = useRef<View>(null);
@@ -54,6 +56,8 @@ const TodoBox = (props: Props) => {
       console.log('x:', x, 'y:', y);
       console.log('width:', width, 'height:', height);
       setMoveableTodo({...todo, style: styles.container, location: {x, y}});
+
+      setIsTransparent(true);
 
       offset.value = {x: 0, y: 0};
     });
@@ -89,7 +93,9 @@ const TodoBox = (props: Props) => {
 
   return (
     <GestureDetector gesture={combinedGesture}>
-      <View ref={ref} style={styles.container}>
+      <View
+        ref={ref}
+        style={[styles.container, isTransparent && styles.transparent]}>
         <Text>{todo.text}</Text>
       </View>
     </GestureDetector>
@@ -101,6 +107,9 @@ export const styles = StyleSheet.create({
     backgroundColor: '#77DDF9',
     padding: 20,
     borderRadius: 8,
+  },
+  transparent: {
+    display: 'none',
   },
 });
 
