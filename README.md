@@ -6,6 +6,12 @@ A React Native toy project demonstrating seamless drag-and-drop functionality be
 
 This project showcases how to implement independent drag-and-drop operations between two separate scroll views without interfering with the native scrolling behavior. It allows users to freely move items between containers while maintaining each view's original functionality.
 
+## Demo
+
+<p align="center">
+  <img src="./assets/GuestureTestDemo.gif" alt="GestureTest Demo" width="300" />
+</p>
+
 ## Key Features
 
 - **Independent Scroll Views**: Drag operations don't interfere with scrolling behavior
