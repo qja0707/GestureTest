@@ -68,6 +68,8 @@ const TodoBox = (props: Props) => {
   const handleFinalize = () => {
     panEnabled.current = false;
 
+    setIsTransparent(false);
+
     eventBus.emit(EVENT_NAMES.TODO_FINALIZE);
   };
 
